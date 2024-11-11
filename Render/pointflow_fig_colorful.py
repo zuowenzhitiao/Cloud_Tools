@@ -91,30 +91,31 @@ def colormap(x,y,z):
     vec /= norm
     return [vec[0], vec[1], vec[2]]
 
-# 遍历文件夹内所有扩展名为xyz的文件
+
+def main(directory):
+    for root, _, files in os.walk(directory):
+        for file in files:
+            if file.endswith(".xyz"):
+                xml_segments = [xml_head]
+                # file_name 为去掉后缀的文件名
+                file_name = os.path.splitext(file)[0]
+                pcl = np.loadtxt(os.path.join(directory, file))
+                pcl = standardize_bbox(pcl, len(pcl))
+                pcl = pcl[:,[2,0,1]]
+                pcl[:,0] *= -1
+                pcl[:,2] += 0.0125
+
+                for i in range(pcl.shape[0]):
+                    # color = colormap(pcl[i,0]+0.5,pcl[i,1]+0.5,pcl[i,2]+0.5-0.0125)
+                    # color = [0,0,1]
+                    color = [0.5,0.5,0.5]
+                    xml_segments.append(xml_ball_segment.format(pcl[i,0],pcl[i,1],pcl[i,2], *color))
+                xml_segments.append(xml_tail)
+
+                xml_content = str.join('', xml_segments)
+
+                with open(directory + '/' + file_name + '.xml', 'w') as f:
+                    f.write(xml_content)
+
 directory = "/media/ubuntu/JK的1号仓库/wcc实验/点云对照/mse/xyz"
-for root, _, files in os.walk(directory):
-    for file in files:
-        if file.endswith(".xyz"):
-            xml_segments = [xml_head]
-            # file_name 为去掉后缀的文件名
-            file_name = os.path.splitext(file)[0]
-            pcl = np.loadtxt(os.path.join(directory, file))
-            pcl = standardize_bbox(pcl, len(pcl))
-            pcl = pcl[:,[2,0,1]]
-            pcl[:,0] *= -1
-            pcl[:,2] += 0.0125
-
-            for i in range(pcl.shape[0]):
-                # color = colormap(pcl[i,0]+0.5,pcl[i,1]+0.5,pcl[i,2]+0.5-0.0125)
-                # color = [0,0,1]
-                color = [0.5,0.5,0.5]
-                xml_segments.append(xml_ball_segment.format(pcl[i,0],pcl[i,1],pcl[i,2], *color))
-            xml_segments.append(xml_tail)
-
-            xml_content = str.join('', xml_segments)
-
-            with open(directory + '/' + file_name + '.xml', 'w') as f:
-                f.write(xml_content)
-
-
+main(directory)

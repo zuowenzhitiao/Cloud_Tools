@@ -46,9 +46,9 @@ def xyz2ply(directory):
 
 def npy2xyz(directory):
     timestamp = datetime.now().strftime('%m%d_%H%M')
-    npy_directory = os.path.join(directory, f'npy_{timestamp}')
+    npy_directory = os.path.join(directory, f'npy')
     os.makedirs(npy_directory)
-    xyz_directory = os.path.join(directory, f'xyz_{timestamp}')
+    xyz_directory = os.path.join(directory, f'xyz')
     os.makedirs(xyz_directory)
 
     for file in os.listdir(directory):
@@ -117,3 +117,26 @@ def ply2xyz(directory):
         pts = np.vstack([plydata['vertex']['x'], plydata['vertex']['y'], plydata['vertex']['z']]).T
         xyz_file = os.path.splitext(ply_file)[0] + '.xyz'
         np.savetxt(os.path.join(xyz_directory, xyz_file), pts, fmt='%f')
+
+# xyz to npy
+def xyz2npy(directory):
+    timestamp = datetime.now().strftime('%m%d_%H%M')
+    xyz_directory = os.path.join(directory, f'xyz_{timestamp}')
+    os.makedirs(xyz_directory)
+    npy_directory = os.path.join(directory, f'npy_{timestamp}')
+    os.makedirs(npy_directory)
+
+    for file in os.listdir(directory):
+        if file.endswith('.xyz'):
+            shutil.move(os.path.join(directory, file), os.path.join(xyz_directory, file))
+
+    xyz_files = [f for f in os.listdir(xyz_directory) if f.endswith('.xyz')]
+
+    for xyz_file in xyz_files:
+        pts = np.loadtxt(os.path.join(xyz_directory, xyz_file))
+        npy_file = os.path.splitext(xyz_file)[0] + '.npy'
+        np.save(os.path.join(npy_directory, npy_file), pts)
+
+if __name__ == '__main__':
+    dir = '/media/ubuntu/JK的1号仓库/wcc实验/点云对照/psnr'
+    ply2xyz(dir)
